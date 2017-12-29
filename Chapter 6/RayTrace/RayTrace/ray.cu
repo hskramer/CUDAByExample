@@ -107,7 +107,17 @@ int main(void)
 
 	HANDLE_ERROR(cudaMemcpy(bitmap.get_ptr(), d_bitmap, bitmap.image_size(), cudaMemcpyDeviceToHost));
 
+	HANDLE_ERROR(cudaEventRecord(stop, 0));
+	HANDLE_ERROR(cudaEventSynchronize(stop));
+
+	float	elapsedTime;
+	HANDLE_ERROR(cudaEventElapsedTime(&elapsedTime, start, stop));
+	printf("Time to generate:   %3.2fms\n", elapsedTime);
+	HANDLE_ERROR(cudaEventDestroy(start));
+	HANDLE_ERROR(cudaEventDestroy(stop));
+
 	bitmap.display_and_exit();
+	cudaFree(d_bitmap);
 	cudaFree(s);
 
 	return 0;

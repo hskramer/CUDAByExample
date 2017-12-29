@@ -8,7 +8,6 @@
 #define rnd(x) (x * rand() / RAND_MAX)
 
 
-
 struct Sphere {
 	float	r, g, b;
 	float	radius;
@@ -29,8 +28,9 @@ struct Sphere {
 	}
 };
 
+Sphere	__constant__ s[SPHERES];
 
-__global__ void kernel(Sphere *s, unsigned char *ptr)
+__global__ void kernel(unsigned char *ptr)
 {
 	int		x = blockIdx.x * blockDim.x + threadIdx.x;
 	int		y = blockIdx.y * blockDim.y + threadIdx.y;
@@ -59,9 +59,7 @@ __global__ void kernel(Sphere *s, unsigned char *ptr)
 	ptr[offset * 4 + 1] = (int)(g * 255);
 	ptr[offset * 4 + 2] = (int)(b * 255);
 	ptr[offset * 4 + 3] = 255;
-
-
-
+	
 }
 
 
@@ -75,12 +73,9 @@ int main(void)
 
 	CPUBitmap	bitmap(DIM, DIM);
 	unsigned  char		*d_bitmap;
-	Sphere		*s;
 
 	// allocate memory on GPU for output bitmap
 	HANDLE_ERROR(cudaMalloc((void**)&d_bitmap, bitmap.image_size()));
-	// allocate memory for Sphere dataset
-	HANDLE_ERROR(cudaMalloc((void**)&s, sizeof(Sphere) * SPHERES));
 
 	// allocate temp memory, initialize it, copy to GPU memory, then free temp memory
 	Sphere	*temp_s = (Sphere *)malloc(sizeof(Sphere) * SPHERES);
@@ -97,18 +92,28 @@ int main(void)
 
 	}
 
-	HANDLE_ERROR(cudaMemcpy(s, temp_s, sizeof(Sphere) * SPHERES, cudaMemcpyHostToDevice));
+	HANDLE_ERROR(cudaMemcpyToSymbol(s, temp_s, sizeof(Sphere) * SPHERES));
 	free(temp_s);
 
 	dim3	grids(DIM / 16, DIM / 16);
 	dim3	threads(16, 16);
 
-	kernel << <grids, threads >> > (s, d_bitmap);
+	kernel << <grids, threads >> > (d_bitmap);
 
 	HANDLE_ERROR(cudaMemcpy(bitmap.get_ptr(), d_bitmap, bitmap.image_size(), cudaMemcpyDeviceToHost));
 
+	HANDLE_ERROR(cudaEventRecord(stop, 0));
+	HANDLE_ERROR(cudaEventSynchronize(stop));
+
+	float	elapsedTime;
+	HANDLE_ERROR(cudaEventElapsedTime(&elapsedTime, start, stop));
+	printf("Time to generate:   %3.2fms\n", elapsedTime);
+	HANDLE_ERROR(cudaEventDestroy(start));
+	HANDLE_ERROR(cudaEventDestroy(stop));
+
 	bitmap.display_and_exit();
-	cudaFree(s);
+	cudaFree(d_bitmap);
+	cudaFree(d_bitmap);
 
 	return 0;
 }
