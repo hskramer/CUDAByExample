@@ -19,8 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{993055C4-CA5A-40CC-82E9-5E5E1B04C608}</ProjectGuid>
-    <RootNamespace>Heat</RootNamespace>
+    <ProjectGuid>{613E65B4-49DF-4799-8201-E1A8B8A17242}</ProjectGuid>
+    <RootNamespace>HeatTxtr</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -156,7 +156,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <CudaCompile Include="heat.cu" />
+    <CudaCompile Include="heattxtr.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
