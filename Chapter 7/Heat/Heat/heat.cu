@@ -52,8 +52,8 @@ struct DataBlock {
 void anim_gpu(DataBlock *d, int ticks)
 {
 	HANDLE_ERROR(cudaEventRecord(d->start, 0));
-	dim3	blocks(DIM / 16, DIM / 16);
-	dim3	threads(16, 16);
+	dim3	blocks(DIM / 32, DIM / 32);
+	dim3	threads(32, 32);
 	CPUAnimBitmap	*bitmap = d->bitmap;
 
 	for (int i = 0; i < 90; i++)
